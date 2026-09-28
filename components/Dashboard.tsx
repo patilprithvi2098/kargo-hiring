@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Candidate } from "@/lib/db";
 import { rankRole, type Ranked } from "@/lib/rank";
@@ -116,8 +116,7 @@ export default function Dashboard({ reviewer, candidates, rubrics, testRecipient
         })}
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
-        <CandidateTable
+      <CandidateTable
           role={role}
           ranked={ranked}
           pending={pending}
@@ -128,24 +127,19 @@ export default function Dashboard({ reviewer, candidates, rubrics, testRecipient
             router.refresh();
           }}
         />
-        <div className="lg:sticky lg:top-4 lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto">
-          {selected && selected.pipeline_status === "ready" ? (
-            <CandidateDetail
-              key={selected.id + selected.email_type + selected.email_status}
-              c={selected}
-              rank={selectedRank}
-              rubrics={rubrics}
-              testRecipient={testRecipient}
-              resendReady={resendReady}
-              onChanged={() => router.refresh()}
-            />
-          ) : (
-            <div className="rounded-lg border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-              Select a candidate to see the brief, score evidence and draft email.
-            </div>
-          )}
-        </div>
-      </div>
+      {selected && selected.pipeline_status === "ready" && (
+        <SlideOver onClose={() => setSelectedId(null)}>
+          <CandidateDetail
+            key={selected.id + selected.email_type + selected.email_status}
+            c={selected}
+            rank={selectedRank}
+            rubrics={rubrics}
+            testRecipient={testRecipient}
+            resendReady={resendReady}
+            onChanged={() => router.refresh()}
+          />
+        </SlideOver>
+      )}
     </div>
   );
 }
@@ -345,11 +339,13 @@ function Row({
         <td className="px-3 py-2 font-mono text-slate-500">{c.rank}</td>
         <td className="px-3 py-2">
           <div className="font-medium">{c.name ?? "(name not found)"}</div>
-          <div className="max-w-[16rem] truncate text-xs text-slate-500">{(c.profile?.headline as string) ?? c.cv_filename}</div>
-          {!c.scores[c.role_applied]?.passes_floor && (
-            <Chip tone="red">below {c.role_applied} floor</Chip>
-          )}{" "}
-          {strongOperator(c) && <Chip tone="blue">strong operator — other role?</Chip>}
+          <div className="max-w-[28rem] truncate text-xs text-slate-500">{(c.profile?.headline as string) ?? c.cv_filename}</div>
+          {(!c.scores[c.role_applied]?.passes_floor || strongOperator(c)) && (
+            <div className="mt-1 flex flex-wrap gap-1">
+              {!c.scores[c.role_applied]?.passes_floor && <Chip tone="red">below {c.role_applied} floor</Chip>}
+              {strongOperator(c) && <Chip tone="blue">strong operator — other role?</Chip>}
+            </div>
+          )}
         </td>
         <td className="px-3 py-2">
           <div className="flex items-center gap-2">
@@ -360,12 +356,10 @@ function Row({
           </div>
         </td>
         <td className="px-3 py-2 font-mono text-slate-500">
-          {c.scores[other]?.total.toFixed(0) ?? "–"}
-          {c.mismatch && (
-            <span className="ml-1">
-              <Chip tone="amber">fits {c.mismatch}?</Chip>
-            </span>
-          )}
+          <div className="flex flex-wrap items-center gap-1">
+            {c.scores[other]?.total.toFixed(0) ?? "–"}
+            {c.mismatch && <Chip tone="amber">fits {c.mismatch}?</Chip>}
+          </div>
         </td>
         <td className="px-3 py-2">
           <Chip tone={c.recommendation === "invite" ? "green" : "slate"}>
@@ -378,12 +372,50 @@ function Row({
       </tr>
       {c.rank === SHORTLIST_SIZE && (
         <tr>
-          <td colSpan={6} className="border-t-2 border-dashed border-emerald-400 px-3 py-1 text-center text-xs text-emerald-700">
-            Shortlist line — the top {SHORTLIST_SIZE} above the role floor get invite drafts; everyone else gets a decline draft. Skim below the line once.
+          <td colSpan={6} className="px-3 py-0">
+            <div className="flex items-center gap-3 py-1.5" title="The top 5 above the role floor get invite drafts; everyone else gets a decline draft.">
+              <div className="h-px flex-1 border-t border-dashed border-emerald-400" />
+              <span className="whitespace-nowrap text-[11px] font-medium uppercase tracking-wide text-emerald-700">
+                Shortlist line · top {SHORTLIST_SIZE}
+              </span>
+              <div className="h-px flex-1 border-t border-dashed border-emerald-400" />
+            </div>
           </td>
         </tr>
       )}
     </>
+  );
+}
+
+/* ---------------------------------------------------------------- slide-over */
+
+function SlideOver({ onClose, children }: { onClose: () => void; children: React.ReactNode }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [onClose]);
+  return (
+    <div className="fixed inset-0 z-20 flex justify-end bg-slate-900/40" onClick={onClose} role="dialog" aria-modal="true">
+      <div
+        className="relative h-full w-full max-w-3xl overflow-y-auto bg-slate-50 p-3 shadow-2xl sm:p-4"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          onClick={onClose}
+          aria-label="Close"
+          className="sticky top-0 z-10 float-right mb-2 rounded-md border border-slate-300 bg-white px-2.5 py-1 text-sm shadow-sm hover:bg-slate-50"
+        >
+          ✕ Close
+        </button>
+        <div className="clear-both">{children}</div>
+      </div>
+    </div>
   );
 }
 
