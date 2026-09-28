@@ -18,7 +18,7 @@ import { draftEmail, writeBrief } from "./4-ai";
 // Trigger/Input -> Context -> Processing -> AI -> (Output: dashboard).
 // Email sending is NOT part of the pipeline — it waits for the founder.
 
-export async function processUpload(file: File, role: Role): Promise<string> {
+export async function processUpload(file: File, role: Role, opts: { sync?: boolean } = {}): Promise<string> {
   // TRIGGER + INPUT
   const input = await readCvFile(file, role);
 
@@ -32,7 +32,7 @@ export async function processUpload(file: File, role: Role): Promise<string> {
   });
 
   try {
-    await runAiSteps(id);
+    await runAiSteps(id, opts);
   } catch (e) {
     await updateCandidate(id, { pipeline_status: "error", pipeline_error: String((e as Error).message ?? e) });
   }
@@ -40,7 +40,7 @@ export async function processUpload(file: File, role: Role): Promise<string> {
 }
 
 /** Context(2b) -> Processing -> AI. Re-runnable for a candidate that errored. */
-export async function runAiSteps(id: string) {
+export async function runAiSteps(id: string, opts: { sync?: boolean } = {}) {
   const c = await getCandidate(id);
   if (!c?.cv_content) throw new Error("Candidate has no CV content");
   const rubrics = await getRubrics();
@@ -64,7 +64,8 @@ export async function runAiSteps(id: string) {
   });
   await updateCandidate(id, { brief, pipeline_status: "ready" });
 
-  await syncRecommendations(c.role_applied);
+  // Bulk loads pass sync:false and re-rank once at the end, instead of after every CV.
+  if (opts.sync !== false) await syncRecommendations(c.role_applied);
 }
 
 /**

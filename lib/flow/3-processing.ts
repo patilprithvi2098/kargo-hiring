@@ -133,7 +133,11 @@ For PM and for SPM: decide the role floor (one-sentence reason), then return one
     const criteria: CriterionScore[] = scored.map((c) => ({
       key: c.key,
       score: capped[c.key],
-      evidence: c.quote ? `“${c.quote}” — ${c.reasoning}` : `Not demonstrated on the CV. ${c.reasoning}`.trim(),
+      evidence: c.quote
+        ? `“${c.quote}” — ${c.reasoning}`
+        : /^not demonstrated/i.test(c.reasoning)
+          ? c.reasoning
+          : `Not demonstrated on the CV. ${c.reasoning}`.trim(),
       verified: c.verified,
       confidence: c.confidence,
       capped: c.rejected
