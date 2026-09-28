@@ -15,6 +15,8 @@ export type CriterionScore = {
   evidence: string;
   verified?: boolean;
   capped?: string;
+  /** Scores from each run when a borderline candidate was re-scored (median is used). */
+  runs?: number[];
   confidence?: "high" | "medium" | "low";
 };
 export type RoleScore = {
@@ -53,6 +55,8 @@ export type Candidate = {
   sent_by: string | null;
   resend_id: string | null;
   send_channel: "resend" | "gmail" | null;
+  /** Fingerprint of the redacted CV text; equal hashes = same CV submitted twice. */
+  content_hash: string | null;
   scores: Partial<Record<Role, RoleScore>>;
 };
 

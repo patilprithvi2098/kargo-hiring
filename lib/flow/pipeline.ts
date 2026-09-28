@@ -4,14 +4,16 @@ import {
   getCandidate,
   getRubrics,
   listCandidates,
+  type RoleScore,
   updateCandidate,
   upsertScore,
   type Candidate,
 } from "../db";
-import type { Role } from "../rubric";
+import { BORDERLINE_BAND, MIN_INVITE_SCORE, applyCaps, weightedTotal, type Role } from "../rubric";
 import { readCvFile } from "./1-input";
-import { extractProfile, separatePersonalDetails, type Profile } from "./2-context";
+import { assertNoPersonalDetails, extractProfile, separatePersonalDetails, type Profile } from "./2-context";
 import { rankRole, recommendationFor, scoreBothRoles } from "./3-processing";
+import { shortlistLine } from "../rank";
 import { draftEmail, writeBrief } from "./4-ai";
 
 // Runs the Components Map left to right for one uploaded CV:
@@ -45,6 +47,9 @@ export async function runAiSteps(id: string, opts: { sync?: boolean } = {}) {
   if (!c?.cv_content) throw new Error("Candidate has no CV content");
   const rubrics = await getRubrics();
 
+  // Fail closed: never send content to the AI if anything personal survived redaction.
+  assertNoPersonalDetails(c.cv_content);
+
   // CONTEXT (2b) — structured profile from redacted content
   const profile = await extractProfile(c.cv_content);
   await updateCandidate(id, { profile, pipeline_status: "extracted", pipeline_error: null });
@@ -73,10 +78,11 @@ export async function runAiSteps(id: string, opts: { sync?: boolean } = {}) {
  * Human choices always win: an explicit decision or a hand-edited draft is never overwritten.
  */
 export async function syncRecommendations(role: Role) {
+  await stabilizeBorderline(role);
   const ranked = rankRole(await listCandidates(), role);
   for (const r of ranked) {
     if (r.pipeline_status !== "ready" || r.email_status === "sent") continue;
-    const recommendation = recommendationFor(r.rank, r.scores[role]?.passes_floor ?? true);
+    const recommendation = recommendationFor(r.rank, r.scores[role]?.passes_floor ?? true, r.total);
     const wanted = r.decision ?? recommendation;
     const patch: Partial<Candidate> = {};
     if (r.recommendation !== recommendation) patch.recommendation = recommendation;
@@ -114,4 +120,60 @@ export async function setDecision(id: string, decision: "invite" | "decline", re
     });
   }
   await updateCandidate(id, patch);
+}
+
+const median = (xs: number[]) => [...xs].sort((a, b) => a - b)[Math.floor(xs.length / 2)];
+
+/**
+ * The model's 1–5 judgements vary between runs (the same CV submitted twice scored 20 and 40).
+ * Anyone whose score could move them across the shortlist line or the invite minimum is scored
+ * two more times; each criterion uses the median of 3 runs. Duplicate CVs share one result.
+ */
+export async function stabilizeBorderline(role: Role) {
+  const rubrics = await getRubrics();
+  const done = new Set<string>();
+  for (let pass = 0; pass < 3; pass++) {
+    const ranked = rankRole(await listCandidates(), role);
+    const line = shortlistLine(ranked);
+    const near = (t: number) =>
+      Math.abs(t - MIN_INVITE_SCORE) <= BORDERLINE_BAND || (line !== null && Math.abs(t - line) <= BORDERLINE_BAND);
+    const todo = ranked.filter(
+      (r) =>
+        r.pipeline_status === "ready" &&
+        r.email_status !== "sent" &&
+        !done.has(r.content_hash ?? r.id) &&
+        !r.scores[role]?.criteria[0]?.runs &&
+        (near(r.total) || r.duplicateOf.length > 0),
+    );
+    if (!todo.length) return;
+    for (const r of todo) {
+      done.add(r.content_hash ?? r.id);
+      const c = await getCandidate(r.id);
+      if (!c?.cv_content || !c.profile) continue;
+      const extra = [
+        await scoreBothRoles(c.profile as unknown as Profile, c.cv_content, rubrics),
+        await scoreBothRoles(c.profile as unknown as Profile, c.cv_content, rubrics),
+      ];
+      const twins = ranked.filter((x) => x.content_hash && x.content_hash === r.content_hash).map((x) => x.id);
+      for (const scoreRole of ["PM", "SPM"] as Role[]) {
+        const all = [c.scores[scoreRole], ...extra.map((e) => e[scoreRole])].filter(Boolean) as RoleScore[];
+        const criteria = rubrics[scoreRole].criteria.map((cr) => {
+          const runs = all.map((a) => a.criteria.find((x) => x.key === cr.key)?.score ?? 1);
+          const m = median(runs);
+          // keep the evidence from a run that actually gave the median score
+          const src = all.find((a) => a.criteria.find((x) => x.key === cr.key)?.score === m) ?? all[0];
+          return { ...src.criteria.find((x) => x.key === cr.key)!, score: m, runs };
+        });
+        const capped = applyCaps(scoreRole, Object.fromEntries(criteria.map((x) => [x.key, x.score])));
+        const floorVotes = all.filter((a) => a.passes_floor).length;
+        const stable: RoleScore = {
+          total: weightedTotal(rubrics[scoreRole], capped),
+          criteria: criteria.map((x) => ({ ...x, score: capped[x.key] })),
+          passes_floor: floorVotes * 2 > all.length,
+          floor_reason: all.find((a) => a.passes_floor === floorVotes * 2 > all.length)?.floor_reason ?? null,
+        };
+        for (const id of twins.length ? twins : [r.id]) await upsertScore(id, scoreRole, stable);
+      }
+    }
+  }
 }

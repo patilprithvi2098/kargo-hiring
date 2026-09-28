@@ -48,6 +48,10 @@ SCORING
 - Every candidate is scored against BOTH rubrics; flag if the other role fits 10+ points better.
 - Every score above 2 needs a quote copied word-for-word from the CV. Code checks the quote against
   the CV text; if it is not found, the score is capped at 2 and flagged.
+- Consistency: the model's 1–5 judgements vary between runs — the same CV submitted twice
+  (14_sneha_kulkarni / 21_aryan_kulkarni) scored 20 and 40. So anyone within 10 points of the
+  shortlist line or of 50 is scored 3 times and each criterion uses the median; identical CVs are
+  detected by a fingerprint of their redacted text and share one set of scores.
 - Code-enforced rules (not left to the model):
     * SPM integration depth is capped at 3 unless ops-native >= 3 (the Preetham lesson).
     * A feature kill counts under "Ships and kills" only, never under "Owns a loss".
@@ -148,7 +152,8 @@ Arjun logs a 1–5 per probe, so CV scores can be checked against interview real
 ====================================================================
 RECOMMENDATION (the system recommends — Arjun decides)
 ====================================================================
-Top 5 per role (floor-passers first, then by score) -> draft interview invite.
+Invite draft only if ALL three hold: top 5 for the role, above the role floor, and score >= 50.
+  (Added after the first full run: in a thin SPM pool, #5 scored 31 and would have been invited.)
 Everyone else -> draft (NOT send) a respectful decline.
 Arjun can override either way and confirms every single send. Nothing is auto-rejected or auto-sent.
 

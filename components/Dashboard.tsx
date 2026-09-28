@@ -340,10 +340,11 @@ function Row({
         <td className="px-3 py-2">
           <div className="font-medium">{c.name ?? "(name not found)"}</div>
           <div className="max-w-[28rem] truncate text-xs text-slate-500">{(c.profile?.headline as string) ?? c.cv_filename}</div>
-          {(!c.scores[c.role_applied]?.passes_floor || strongOperator(c)) && (
+          {(!c.scores[c.role_applied]?.passes_floor || strongOperator(c) || c.duplicateOf.length > 0) && (
             <div className="mt-1 flex flex-wrap gap-1">
               {!c.scores[c.role_applied]?.passes_floor && <Chip tone="red">below {c.role_applied} floor</Chip>}
               {strongOperator(c) && <Chip tone="blue">strong operator — other role?</Chip>}
+              {c.duplicateOf.length > 0 && <Chip tone="amber">same CV as {c.duplicateOf.join(", ")}</Chip>}
             </div>
           )}
         </td>
@@ -552,7 +553,12 @@ function CandidateDetail({
                 </div>
                 <p className="text-xs text-slate-600">
                   {s?.evidence}{" "}
-                  {s?.capped && <Chip tone="amber">{s.capped}</Chip>}
+                  {s?.capped && <Chip tone="amber">{s.capped}</Chip>}{" "}
+                  {s?.runs && s.runs.length > 1 && (
+                    <Chip tone="slate">
+                      borderline — scored {s.runs.length}× ({s.runs.join(" · ")}), median used
+                    </Chip>
+                  )}
                 </p>
               </li>
             );

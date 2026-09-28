@@ -161,6 +161,10 @@ export function weightedTotal(rubric: Rubric, scores: Record<string, number>): n
 }
 
 export const SHORTLIST_SIZE = 5;
+/** An invite needs a real score, not just a top-5 rank in a thin pool (SPM #5 scored 31). */
+export const MIN_INVITE_SCORE = 50;
+/** Candidates this close to the shortlist line or MIN_INVITE_SCORE are re-scored 3x (median). */
+export const BORDERLINE_BAND = 10;
 
 /**
  * Role floor — pass/fail, not weighted. This is where the JD's requirements live.

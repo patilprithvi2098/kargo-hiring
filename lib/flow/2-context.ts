@@ -26,7 +26,27 @@ export function linkedinFrom(rawText: string): string | null {
 }
 
 const EMAIL_RE = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
-const PHONE_RE = /(?:\+?\d{1,3}[\s-]?)?(?:\(?\d{2,5}\)?[\s-]?){2,4}\d{3,5}/g;
+// Phone numbers. Any run of 10+ digits (single spaces/dots/hyphens allowed between them) is treated as a
+// phone number. Earlier, narrower patterns leaked real CVs where the number was printed twice or glued
+// ("+91 94472 3810494472 38104"). Metrics survive: they use commas/decimals ("₹12,00,000", "99.95%").
+const DIGIT_RUN = /\+?\(?\d\)?(?:[ .-]?\(?\d\)?){9,}/g;
+const PHONE_PATTERNS = [
+  DIGIT_RUN,
+  /(?<!\d)0\d{2,4}[ .-]?\d{6,8}(?!\d)/g, // landline with trunk prefix
+];
+/** Anything that still looks like a phone number or email after redaction blocks the AI call. */
+const LEAK_CHECKS: [string, RegExp][] = [
+  ["phone number", /\d(?:[ .-]?\d){9,}/],
+  ["email address", /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/],
+];
+
+export function assertNoPersonalDetails(content: string) {
+  for (const [what, re] of LEAK_CHECKS) {
+    if (re.test(content)) {
+      throw new Error(`Privacy check failed: a ${what} survived redaction, so this CV was NOT sent to the AI`);
+    }
+  }
+}
 const URL_RE =
   // no leading \b on the domains: PDFs often glue a URL to the previous word ("productlinkedin.com/in/…")
   /(?:https?:\/\/|www\.)\S+|(?:linkedin\.com|github\.com|behance\.net|flowcv\.me|medium\.com|twitter\.com|\bx\.com)\/\S*/gi;
@@ -47,26 +67,19 @@ export function nameFromFilename(filename: string): string | null {
   return words.length >= 1 && words.length <= 4 ? titleCase(words.join(" ").toLowerCase()) : null;
 }
 
-function isPhone(s: string) {
-  const digits = s.replace(/\D/g, "");
-  return digits.length >= 10 && digits.length <= 13 && !/^(19|20)\d{2}\D/.test(s.trim());
-}
-
 export function separatePersonalDetails(
   rawText: string,
   filename: string,
 ): { personal: PersonalDetails; content: string } {
   const email = rawText.match(EMAIL_RE)?.[0] ?? null;
-  const phone = (rawText.match(PHONE_RE) ?? []).find(isPhone)?.trim() ?? null;
+  const phone = PHONE_PATTERNS.map((re) => rawText.match(re)?.[0]).find(Boolean)?.trim() ?? null;
   const name = nameFromFilename(filename);
   const linkedin_url = linkedinFrom(rawText);
 
-  let content = rawText
-    .replace(EMAIL_RE, "[EMAIL]")
-    .replace(URL_RE, "[LINK]")
-    .replace(PHONE_RE, (m) => (isPhone(m) ? "[PHONE]" : m));
+  let content = rawText.replace(EMAIL_RE, "[EMAIL]").replace(URL_RE, "[LINK]");
+  for (const re of PHONE_PATTERNS) content = content.replace(re, "[PHONE]");
 
-  if (name) {
+  if (name && name.replace(/\s/g, "").length >= 3) {
     const escaped = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     content = content.replace(new RegExp(escaped(name).replace(/\s+/g, "\\s+"), "gi"), "[CANDIDATE]");
     for (const token of name.split(" ").filter((t) => t.length >= 3)) {
