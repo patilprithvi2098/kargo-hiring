@@ -36,6 +36,7 @@ export async function POST(req: Request, ctx: RouteContext<"/api/candidates/[id]
       sent_at: now,
       sent_by: reviewer,
       resend_id: resendId,
+      send_channel: "resend",
       // sending IS the decision: record who made it
       decision: c.email_type,
       decided_by: c.decided_by ?? reviewer,

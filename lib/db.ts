@@ -52,6 +52,7 @@ export type Candidate = {
   sent_at: string | null;
   sent_by: string | null;
   resend_id: string | null;
+  send_channel: "resend" | "gmail" | null;
   scores: Partial<Record<Role, RoleScore>>;
 };
 

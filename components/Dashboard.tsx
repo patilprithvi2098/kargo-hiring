@@ -27,6 +27,12 @@ async function post(url: string, body?: unknown) {
 
 const firstName = (n: string | null) => n?.split(" ")[0] || "there";
 
+/** Gmail compose window, pre-filled. Arjun presses Send himself — the app sends nothing. */
+function gmailComposeUrl(to: string, subject: string, body: string) {
+  const q = new URLSearchParams({ view: "cm", fs: "1", to, su: subject, body });
+  return `https://mail.google.com/mail/?${q.toString()}`;
+}
+
 /** Below the role floor but a strong operator — worth routing to ops / CS / solutions roles instead. */
 const strongOperator = (c: Candidate) =>
   !c.scores[c.role_applied]?.passes_floor &&
@@ -403,6 +409,7 @@ function CandidateDetail({
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
+  const [openedGmail, setOpenedGmail] = useState(false);
 
   const role = c.role_applied;
   const other: Role = role === "PM" ? "SPM" : "PM";
@@ -595,7 +602,8 @@ function CandidateDetail({
           </h3>
           {sent && (
             <span className="text-xs text-blue-700">
-              Sent to {c.email_to} by {c.sent_by} · {new Date(c.sent_at!).toLocaleString()}
+              Sent {c.send_channel === "gmail" ? "from Gmail" : "via Resend"} to {c.email_to} by {c.sent_by} ·{" "}
+              {new Date(c.sent_at!).toLocaleString()}
             </span>
           )}
         </div>
@@ -625,13 +633,54 @@ function CandidateDetail({
             >
               {busy === "save" ? "Saving…" : "Save edits"}
             </button>
+            <a
+              href={
+                to && !dirty
+                  ? gmailComposeUrl(
+                      to,
+                      subject.replace(/\[NAME\]/g, firstName(c.name)),
+                      body.replace(/\[NAME\]/g, firstName(c.name)),
+                    )
+                  : undefined
+              }
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => {
+                if (dirty || !to) e.preventDefault();
+                else setOpenedGmail(true);
+              }}
+              aria-disabled={dirty || !to}
+              className={`rounded-md bg-red-600 px-3 py-1.5 text-sm font-medium text-white ${
+                dirty || !to ? "pointer-events-none opacity-40" : ""
+              }`}
+              title={dirty ? "Save your edits first" : "Opens a pre-filled draft in your Gmail — you press Send there"}
+            >
+              Open in Gmail ↗
+            </a>
             <button
               disabled={dirty || !!busy || !resendReady || !to}
               onClick={() => setConfirming(true)}
               className="rounded-md bg-emerald-700 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-40"
               title={dirty ? "Save your edits first" : !resendReady ? "Resend key not configured" : ""}
             >
-              Confirm &amp; send {c.email_type}
+              Confirm &amp; send via Resend
+            </button>
+          </div>
+        )}
+        {!sent && openedGmail && (
+          <div className="flex flex-wrap items-center gap-2 rounded-md bg-slate-50 p-2 text-xs text-slate-600">
+            <span>Sent it from Gmail? Record it so the dashboard shows who sent what, and when.</span>
+            <button
+              disabled={!!busy}
+              onClick={() =>
+                act("marked", () => post(`/api/candidates/${c.id}/mark-sent`, { confirmedType: c.email_type }))
+              }
+              className="rounded-md border border-slate-300 bg-white px-2 py-1 font-medium text-slate-800 disabled:opacity-40"
+            >
+              {busy === "marked" ? "Recording…" : "I sent it from Gmail"}
+            </button>
+            <button className="underline" onClick={() => setOpenedGmail(false)}>
+              Not sent
             </button>
           </div>
         )}

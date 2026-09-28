@@ -35,11 +35,20 @@ export async function generateJson<T>(opts: {
   for (const model of targets) {
     if (exhausted.has(model.split("/").pop()!)) continue;
     for (let attempt = 0; attempt < 4; attempt++) {
-      const res = await fetch(`https://generativelanguage.googleapis.com/${model}:generateContent`, {
-        method: "POST",
-        headers: { "content-type": "application/json", "x-goog-api-key": env.geminiKey() },
-        body,
-      });
+      let res: Response;
+      try {
+        res = await fetch(`https://generativelanguage.googleapis.com/${model}:generateContent`, {
+          method: "POST",
+          headers: { "content-type": "application/json", "x-goog-api-key": env.geminiKey() },
+          body,
+          signal: AbortSignal.timeout(90_000),
+        });
+      } catch (e) {
+        // dropped connection / timeout — retry like an overload
+        errors.push(`${model}: ${(e as Error).message}`);
+        await new Promise((r) => setTimeout(r, 2000 * 2 ** attempt));
+        continue;
+      }
       if (res.ok) {
         const data = await res.json();
         const parts: { text?: string; thought?: boolean }[] = data?.candidates?.[0]?.content?.parts ?? [];
