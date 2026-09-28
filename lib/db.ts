@@ -32,6 +32,7 @@ export type Candidate = {
   name: string | null;
   email: string | null;
   phone: string | null;
+  linkedin_url: string | null;
   cv_content?: string;
   profile: Record<string, unknown> | null;
   pipeline_status: "uploaded" | "extracted" | "scored" | "ready" | "error";
@@ -82,6 +83,7 @@ export const createCandidate = (p: {
   name: string | null;
   email: string | null;
   phone: string | null;
+  linkedin_url: string | null;
   cv_content: string;
 }) => rpc<string>("kh_candidate_create", { p });
 

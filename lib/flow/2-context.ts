@@ -9,7 +9,21 @@ import { generateJson } from "../gemini";
 //   that continues down the pipeline has them replaced with placeholders.
 // Step 2b (AI, on redacted text only): turn the CV into a structured profile.
 
-export type PersonalDetails = { name: string | null; email: string | null; phone: string | null };
+export type PersonalDetails = {
+  name: string | null;
+  email: string | null;
+  phone: string | null;
+  linkedin_url: string | null;
+};
+
+// Only a real profile handle counts — many CVs in the pool have a blanked "linkedin.com/in/".
+const LINKEDIN_RE = /linkedin\.com\/in\/([A-Za-z0-9_%-]{3,100})/i;
+
+/** Normalised profile URL for the founder to open himself. Never fetched, never sent to the AI. */
+export function linkedinFrom(rawText: string): string | null {
+  const m = rawText.match(LINKEDIN_RE);
+  return m ? `https://www.linkedin.com/in/${m[1].replace(/[-_]+$/, "")}` : null;
+}
 
 const EMAIL_RE = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
 const PHONE_RE = /(?:\+?\d{1,3}[\s-]?)?(?:\(?\d{2,5}\)?[\s-]?){2,4}\d{3,5}/g;
@@ -45,6 +59,7 @@ export function separatePersonalDetails(
   const email = rawText.match(EMAIL_RE)?.[0] ?? null;
   const phone = (rawText.match(PHONE_RE) ?? []).find(isPhone)?.trim() ?? null;
   const name = nameFromFilename(filename);
+  const linkedin_url = linkedinFrom(rawText);
 
   let content = rawText
     .replace(EMAIL_RE, "[EMAIL]")
@@ -58,7 +73,7 @@ export function separatePersonalDetails(
       content = content.replace(new RegExp(`\\b${escaped(token)}\\b`, "gi"), "[CANDIDATE]");
     }
   }
-  return { personal: { name, email, phone }, content };
+  return { personal: { name, email, phone, linkedin_url }, content };
 }
 
 export type Profile = {

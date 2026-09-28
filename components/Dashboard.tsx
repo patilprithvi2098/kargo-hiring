@@ -433,6 +433,19 @@ function CandidateDetail({
           <p className="text-sm text-slate-500">
             Applied: {ROLE_TITLE[role]} · {c.email ?? "no email found"} · {c.cv_filename}
           </p>
+          {c.linkedin_url ? (
+            <a
+              href={c.linkedin_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-1 inline-block rounded-md border border-slate-300 px-2 py-0.5 text-xs text-slate-700 hover:bg-slate-50"
+              title="Opens LinkedIn in a new tab. Nothing is fetched or scored from it — your judgment only."
+            >
+              View LinkedIn ↗
+            </a>
+          ) : (
+            <span className="mt-1 inline-block text-xs text-slate-400">No LinkedIn link on the CV</span>
+          )}
         </div>
         <div className="text-right">
           <div className="font-mono text-2xl">{c.scores[role]?.total.toFixed(0)}</div>

@@ -166,3 +166,7 @@ PRIVACY
 Scoring runs on CV content only. Name, email, phone and profile links are stripped in code before any
 AI call; identity stays in the database and is re-attached only for display and at send time.
 (College and company names are NOT stripped — pedigree is neutralised by instruction, not redaction.)
+LinkedIn: the profile URL on the CV is stored as a personal detail and shown as a "View LinkedIn" link for
+Arjun to open himself. It is never fetched, scraped or sent to the AI, and never affects the score —
+LinkedIn scraping breaches LinkedIn's terms, goes beyond what candidates consented to, and would favour
+candidates with richer profiles (36 of 60 CVs have a usable link).
