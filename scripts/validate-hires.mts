@@ -36,7 +36,6 @@ const rows = await mapLimit(files, 1, async (f) => {
   return { name: personal.name, rating: RATING[key], s, leaked };
 });
 
-const order = { Exceeds: 0, Meets: 1, Below: 2 } as Record<string, number>;
 rows.sort((a, b) => b.s.PM.total - a.s.PM.total);
 const lines: string[] = [];
 const fmt = (r: typeof rows[number]) =>
