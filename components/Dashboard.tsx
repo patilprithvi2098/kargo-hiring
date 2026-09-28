@@ -373,7 +373,7 @@ function Row({
       {c.rank === SHORTLIST_SIZE && (
         <tr>
           <td colSpan={6} className="border-t-2 border-dashed border-emerald-400 px-3 py-1 text-center text-xs text-emerald-700">
-            Shortlist line — top {SHORTLIST_SIZE} get invite drafts, everyone below gets a decline draft. Skim below the line once.
+            Shortlist line — the top {SHORTLIST_SIZE} above the role floor get invite drafts; everyone else gets a decline draft. Skim below the line once.
           </td>
         </tr>
       )}

@@ -22,5 +22,6 @@ export function rankRole(all: Candidate[], role: Role): Ranked[] {
     });
 }
 
-export const recommendationFor = (rank: number) =>
-  rank <= SHORTLIST_SIZE ? ("invite" as const) : ("decline" as const);
+/** Invite only if in the top N AND above the role floor — a small pool must not turn "top 5" into "everyone". */
+export const recommendationFor = (rank: number, passesFloor: boolean) =>
+  rank <= SHORTLIST_SIZE && passesFloor ? ("invite" as const) : ("decline" as const);

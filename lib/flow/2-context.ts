@@ -14,7 +14,8 @@ export type PersonalDetails = { name: string | null; email: string | null; phone
 const EMAIL_RE = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
 const PHONE_RE = /(?:\+?\d{1,3}[\s-]?)?(?:\(?\d{2,5}\)?[\s-]?){2,4}\d{3,5}/g;
 const URL_RE =
-  /\b(?:https?:\/\/|www\.)\S+|\b(?:linkedin\.com|github\.com|behance\.net|flowcv\.me|medium\.com|twitter\.com|x\.com)\/\S*/gi;
+  // no leading \b on the domains: PDFs often glue a URL to the previous word ("productlinkedin.com/in/…")
+  /(?:https?:\/\/|www\.)\S+|(?:linkedin\.com|github\.com|behance\.net|flowcv\.me|medium\.com|twitter\.com|\bx\.com)\/\S*/gi;
 
 function titleCase(s: string) {
   return s.replace(/\b\w/g, (c) => c.toUpperCase());

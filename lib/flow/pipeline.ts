@@ -75,7 +75,7 @@ export async function syncRecommendations(role: Role) {
   const ranked = rankRole(await listCandidates(), role);
   for (const r of ranked) {
     if (r.pipeline_status !== "ready" || r.email_status === "sent") continue;
-    const recommendation = recommendationFor(r.rank);
+    const recommendation = recommendationFor(r.rank, r.scores[role]?.passes_floor ?? true);
     const wanted = r.decision ?? recommendation;
     const patch: Partial<Candidate> = {};
     if (r.recommendation !== recommendation) patch.recommendation = recommendation;

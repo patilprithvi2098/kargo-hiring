@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "seed:rubric": "node --env-file=.env.local scripts/seed-rubric.mts",
-    "validate:hires": "NODE_OPTIONS=--conditions=react-server npx tsx --env-file=.env.local scripts/validate-hires.mts"
+    "validate:hires": "NODE_OPTIONS=--conditions=react-server npx tsx --env-file=.env.local scripts/validate-hires.mts",
+    "upload": "NODE_OPTIONS=--conditions=react-server npx tsx --env-file=.env.local scripts/upload-cvs.mts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
