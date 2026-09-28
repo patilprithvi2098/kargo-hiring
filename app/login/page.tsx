@@ -13,7 +13,7 @@ export default function LoginPage() {
         </div>
         <label className="block text-sm">
           <span className="text-slate-600">Your name</span>
-          <input name="name" required placeholder="Arjun Mehta" className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" />
+          <input name="name" required defaultValue="Arjun Mehta" placeholder="Arjun Mehta" className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2" />
           <span className="mt-1 block text-xs text-slate-400">Recorded against every decision and email you send.</span>
         </label>
         <label className="block text-sm">
