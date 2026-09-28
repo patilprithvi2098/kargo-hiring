@@ -1,0 +1,168 @@
+KARGO HIRING RUBRIC v2 — PM & SPM
+Reviewed by a 5-advisor LLM council (Contrarian, First Principles, Expansionist, Outsider, Executor)
+with anonymous peer review. v1 had criteria that did not survive the hire data; v2 fixes them.
+
+====================================================================
+THE PRINCIPLE — two layers, two sources
+====================================================================
+  JD    -> ROLE FLOOR (pass/fail)   "Is this the role Kargo needs?"
+  HIRES -> RANKING WEIGHTS          "Of those, who looks like Kargo's best people?"
+
+A criterion carries weight ONLY if the hire data separates Exceeds from Meets/Below.
+Every criterion is labelled with its source. Where a criterion also appears in the JD, that is
+stated, and it is kept only because the hires confirm it.
+
+====================================================================
+WHAT THE HIRE DATA SHOWS
+====================================================================
+Exceeds: Rohan Desai (Eng), Sunita Krishnamurthy (Ops), Aditya Shetty (Sales), Meghna Tiwari (CS),
+         Lavanya Iyer (PM)
+Meets:   Vikram Nair (PM), Rahul Bose (Growth)      Below: Preetham Rao (Backend Eng)
+
+Pattern tested                              Exceeds   Meets/Below   Verdict
+------------------------------------------  -------   -----------   ---------------------------------
+Did hands-on freight/logistics ops work     5 of 5    0 of 3        STRONG — the hidden pattern
+Worked inside the operator's workflow       5 of 5    0 of 3*       STRONG (*Vikram: interviews over calls only)
+Owned a loss/failure on the CV              2 of 5    0 of 3        WEAK but clean
+Shipped AND killed on evidence (PMs only)   1 of 1    0 of 1        n=2 — also in the PM JD
+No layer above / reports to CEO             most      Rahul too     DOES NOT SEPARATE -> moved to SPM floor
+Built something unprompted, adopted         most      Vikram, Rahul, Preetham too    DOES NOT SEPARATE -> interview probe
+Mentored / raised the bar                   some      Rahul, Preetham too            DOES NOT SEPARATE -> interview probe
+Quantified outcomes                         yes       Vikram, Rahul full of numbers  DOES NOT SEPARATE -> floor only
+Pedigree, MBA, certifications, talks        low       Vikram highest                 ANTI-SIGNAL -> zero credit
+
+Honest limitations (say these in class):
+- Only 2 of 8 hires were PMs (Lavanya Exceeds, Vikram Meets). The ops pattern is trusted because it
+  holds across ALL 8 hires in 5 functions, not because of the PM sample.
+- No hire was ever an SPM. The SPM rubric applies the same company-wide pattern + the SPM JD's
+  integration mandate. It is an extrapolation.
+- The hire folder contains CVs only; the brief's "what the interview revealed" notes were not provided.
+- Arjun hired and rated these people — the rubric could encode his own taste. It is tested below
+  (validation) and must be re-checked against interview outcomes as offers are made.
+
+====================================================================
+SCORING
+====================================================================
+- Each criterion scored 1–5 with anchors for every level.
+- Weighted score = sum( ((score - 1) / 4) * weight )  -> 0–100 (all 1s = 0, all 5s = 100).
+- Every candidate is scored against BOTH rubrics; flag if the other role fits 10+ points better.
+- Every score above 2 needs a quote copied word-for-word from the CV. Code checks the quote against
+  the CV text; if it is not found, the score is capped at 2 and flagged.
+- Code-enforced rules (not left to the model):
+    * SPM integration depth is capped at 3 unless ops-native >= 3 (the Preetham lesson).
+    * A feature kill counts under "Ships and kills" only, never under "Owns a loss".
+
+====================================================================
+EVIDENCE RULES (from the evidence-first hiring philosophy)
+====================================================================
+The system never decides whether a candidate is "good". For every candidate it answers:
+  1. What has this person actually demonstrated?   (quoted evidence per criterion)
+  2. At what scope?                                  (demonstrated scope vs title; activity -> output ->
+                                                      outcome -> business impact)
+  3. What is not demonstrated?                       (evidence gaps)
+  4. What must a human verify?                       (interview cards: question, strong answer, red flag)
+- Evidence -> interpretation -> confidence are kept separate. Each score carries a confidence
+  (high / medium / low); a missing or unverifiable quote is always low confidence.
+- Absence of evidence is not absence of ability: "X is not demonstrated on the CV", never
+  "the candidate lacks X". Decline emails never tell a candidate what they lack.
+- Keywords, titles and verbs like "led" are not evidence. Problem -> decision -> action -> result is.
+- Deliberately NOT adopted from the general philosophy, and why:
+    * An 18-dimension generic capability model — the hire data shows generic PM dimensions
+      (stakeholder management, quantified outcomes, business metrics) do not separate Kargo's
+      best hires from average ones; weighting them would re-create JD matching.
+    * No ranking at all — the brief asks for a ranked shortlist. The ranking is kept, but it is
+      explained, carries confidence, and only produces drafts.
+    * Candidate-facing view and startup/MNC toggle — one user (Arjun), one context (Series A).
+
+====================================================================
+PRODUCT MANAGER (PM) — weights sum to 100
+====================================================================
+PM1. Operations-native (has done the work) — 40%        SOURCE: Hires (5/5 vs 0/3)
+  Time spent DOING logistics/freight/supply-chain ops work — not selling to it, consulting on it or
+  building software for it. The JD only asks for "curiosity" about ops; the hires show having done it.
+  Evidence: Lavanya (3 yrs 3PL carrier ops), Rohan (customs-broker ops), Sunita, Meghna (freight
+  documentation), Aditya (port services). None: Vikram, Rahul, Preetham.
+  5 = 2+ yrs doing freight/logistics/supply-chain ops work itself
+  4 = 1–2 yrs of that, or 2+ yrs on a closely adjacent ops floor (warehouse, fulfilment, plant)
+  3 = <1 yr hands-on, or ops-heavy work outside logistics (field, plant, hospital ops)
+  2 = built or sold software for logistics/ops, never did the ops work
+  1 = no operational exposure
+
+PM2. Works inside the operator's workflow — 20%          SOURCE: Hires (5/5 vs 0/3); echoes PM JD
+  Side by side with operational users in their real workflow, and changed something because of it.
+  Evidence: Rohan (field requirements during rollouts), Aditya (alongside terminal ops at peak),
+  Meghna (daily contact on 15–20 live shipments), Lavanya (discovery with freight forwarders ->
+  feature pivot), Sunita (on-site go-live). Vikram: 40+ interviews over calls. Rahul, Preetham: none.
+  5 = repeatedly embedded AND a specific change came from it   4 = embedded, change implied
+  3 = regular contact via interviews/calls/account mgmt         2 = occasional research/data only
+  1 = no direct contact with end users
+
+PM3. Ships and kills in short cycles — 20%               SOURCE: PM JD, confirmed by hires (n=2)
+  Evidence: Lavanya shipped 6, killed 2 on usage data -> 3x weekly active use. Vikram shipped 12,
+  killed none.
+  5 = shipped + killed/pivoted on data, outcome quantified   4 = shipped + kill/pivot without data
+  3 = shipped with adoption numbers, nothing killed          2 = shipped, no outcomes
+  1 = roadmap/process language only
+
+PM4. Owns a loss or failure out loud — 20%               SOURCE: Hires (2/5 vs 0/3)
+  A loss, outage, failed bet or mistake they owned + what changed. Fixing someone else's crisis is not
+  owning a failure. Absence is common on CVs, so absent = 2 (neutral-low) — verify in interview.
+  Evidence: Aditya (lost deal -> post-mortem became team practice), Lavanya (outage post-mortems).
+  5 = own failure + change + became practice for others   4 = own failure + what changed
+  3 = owned the response to an incident                   2 = none mentioned (neutral)
+  1 = wins only, deflecting where issues appear
+
+====================================================================
+SENIOR PRODUCT MANAGER (SPM) — weights sum to 100
+====================================================================
+SPM1. Operations-native — 35%                            SOURCE: Hires (same as PM1)
+SPM2. Integration / data-layer depth — 25%               SOURCE: SPM JD, conditioned by hires
+  Led integrations/migrations/data-quality work touching carriers, ports, ERPs, TMS/FMS, vendors.
+  Capped at 3 in code unless SPM1 >= 3 — Preetham had this skill without ops grounding and rated Below.
+  Evidence: Rohan (vendor migration, 60% lag cut), Sunita (paper -> cloud FMS), Lavanya (carrier
+  integration, first API docs).
+  5 = led multiple external integrations with reliability outcomes   4 = led one significant one
+  3 = contributed, or internal platform work   2 = alongside, not owning   1 = none
+SPM3. Works inside the operator's workflow — 20%         SOURCE: Hires (same as PM2)
+SPM4. Owns a loss or failure out loud — 20%              SOURCE: Hires (same as PM4)
+
+====================================================================
+ROLE FLOOR (pass/fail, not weighted) — this is where the JD lives
+====================================================================
+PM floor:  1+ yr in a product role owning a product/problem area AND one shipped outcome with a number.
+           Students, freshers, pure marketers, project/delivery managers, pure engineers/analysts fail.
+SPM floor: 4+ yrs of product ownership (not delivery) AND consequential product calls with no layer of
+           senior PMs above (sole/most-senior/founding PM, or owned a platform area end-to-end).
+Below the floor: still scored, still gets a draft, ranked below everyone who passes, flagged.
+Strong-operator flag: below the floor but ops-native >= 4 -> "consider for ops / CS / solutions role"
+before declining. Kargo's best hires look like this, and Kargo is hiring 30 more people by December.
+
+====================================================================
+INTERVIEW PROBES (what a CV cannot show — asked of every shortlisted candidate)
+====================================================================
+- "Tell me about something you built that nobody asked for. Who used it?"
+- "Tell me about a call you made with nobody above you to check it. What happened?"
+- "What's something you killed or lost, and what did you change afterwards?"
+Arjun logs a 1–5 per probe, so CV scores can be checked against interview reality.
+
+====================================================================
+RECOMMENDATION (the system recommends — Arjun decides)
+====================================================================
+Top 5 per role (floor-passers first, then by score) -> draft interview invite.
+Everyone else -> draft (NOT send) a respectful decline.
+Arjun can override either way and confirms every single send. Nothing is auto-rejected or auto-sent.
+
+====================================================================
+VALIDATION (before scoring the 60 applicants)
+====================================================================
+The rubric is run on the 8 hire CVs first. Pass condition: Exceeds hires outscore Meets/Below hires,
+and Lavanya is the top PM. Results are in validation-results.txt.
+Second check after the 60 are scored: if the top 5 is almost entirely synthetic pm_/spm_ CVs, treat
+that as a warning of circularity, not proof.
+
+====================================================================
+PRIVACY
+====================================================================
+Scoring runs on CV content only. Name, email, phone and profile links are stripped in code before any
+AI call; identity stays in the database and is re-attached only for display and at send time.
+(College and company names are NOT stripped — pedigree is neutralised by instruction, not redaction.)
