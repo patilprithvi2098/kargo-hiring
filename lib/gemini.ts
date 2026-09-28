@@ -29,7 +29,7 @@ export async function generateJson<T>(opts: {
   const errors: string[] = [];
   // Try the configured model first (both API versions), then fallbacks. Overload (503/429) is
   // retried with backoff; "model not found" (404) moves on immediately.
-  const targets = models.flatMap((m) => [`v1beta/models/${m}`, `v1/models/${m}`]);
+  const targets = models.flatMap((m) => [`v1/models/${m}`, `v1beta/models/${m}`]);
   for (const model of targets) {
     for (let attempt = 0; attempt < 4; attempt++) {
       const res = await fetch(`https://generativelanguage.googleapis.com/${model}:generateContent`, {
