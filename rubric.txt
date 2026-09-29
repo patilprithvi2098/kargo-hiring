@@ -45,7 +45,8 @@ SCORING
 ====================================================================
 - Each criterion scored 1–5 with anchors for every level.
 - Weighted score = sum( ((score - 1) / 4) * weight )  -> 0–100 (all 1s = 0, all 5s = 100).
-- Every candidate is scored against BOTH rubrics; flag if the other role fits 10+ points better.
+- Every candidate is scored against BOTH rubrics; flag "fits other role?" only if that score is 10+ higher,
+  at least 50, and passes that role's floor.
 - Every score above 2 needs a quote copied word-for-word from the CV. Code checks the quote against
   the CV text; if it is not found, the score is capped at 2 and flagged.
 - Consistency: the model's 1–5 judgements vary between runs — the same CV submitted twice

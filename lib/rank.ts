@@ -31,7 +31,9 @@ export function rankRole(all: Candidate[], role: Role): Ranked[] {
         ...c,
         rank: i + 1,
         total: own,
-        mismatch: alt >= own + 10 ? other : null,
+        // Only suggest the other role if they'd be a real candidate there, not just "less bad".
+        mismatch:
+          alt >= own + 10 && alt >= MIN_INVITE_SCORE && c.scores[other]?.passes_floor ? other : null,
         duplicateOf: dupes.filter((d) => d.id !== c.id).map((d) => d.name ?? d.cv_filename),
       };
     });
