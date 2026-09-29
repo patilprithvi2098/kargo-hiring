@@ -9,7 +9,7 @@ export default function LoginPage() {
       <form action={action} className="w-full max-w-sm space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
         <div>
           <h1 className="text-lg font-semibold">Kargo Hiring</h1>
-          <p className="text-sm text-slate-500">PM / SPM shortlist. The system recommends — you decide.</p>
+          <p className="text-sm text-slate-500">Sign in to review candidates for the Product Manager and Senior Product Manager roles.</p>
         </div>
         <label className="block text-sm">
           <span className="text-slate-600">Your name</span>
