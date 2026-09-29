@@ -80,18 +80,14 @@ export default function Dashboard({ reviewer, candidates, rubrics, testRecipient
         </div>
       </header>
 
-      <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-        <b>The system ranks, explains and drafts. You decide.</b> No email is ever sent automatically — each
-        one goes out only when you click <i>Confirm &amp; send</i> on that candidate.
-        {testRecipient && (
-          <span className="block pt-1 text-amber-800">
-            Test mode: all emails are delivered to <b>{testRecipient}</b>.
-          </span>
-        )}
-        {!resendReady && <span className="block pt-1 text-amber-800">Resend key not set yet — sending is disabled.</span>}
-      </div>
-
-      <UploadPanel onDone={() => router.refresh()} />
+      <UploadPanel
+        role={role}
+        onRoleChange={(r) => {
+          setRole(r);
+          setSelectedId(null);
+        }}
+        onDone={() => router.refresh()}
+      />
 
       <div className="flex gap-2">
         {(["PM", "SPM"] as Role[]).map((r) => {
@@ -140,6 +136,15 @@ export default function Dashboard({ reviewer, candidates, rubrics, testRecipient
           />
         </SlideOver>
       )}
+
+      <aside className="pointer-events-none fixed bottom-3 right-3 z-10 max-w-xs rounded-md border border-slate-200 bg-white/90 px-3 py-2 text-[11px] leading-snug text-slate-500 shadow-sm backdrop-blur">
+        <b className="text-slate-700">The system ranks, explains and drafts. You decide.</b> Nothing is sent until you
+        confirm it on that candidate.
+        {testRecipient && (
+          <span className="block text-amber-700">Test mode: all emails go to {testRecipient}.</span>
+        )}
+        {!resendReady && <span className="block text-amber-700">Resend not configured — use Open in Gmail.</span>}
+      </aside>
     </div>
   );
 }
@@ -148,20 +153,31 @@ export default function Dashboard({ reviewer, candidates, rubrics, testRecipient
 
 type UploadRow = { name: string; state: "queued" | "working" | "done" | "error"; note?: string };
 
-function UploadPanel({ onDone }: { onDone: () => void }) {
-  const [role, setRole] = useState<"AUTO" | Role>("AUTO");
+function UploadPanel({
+  role,
+  onRoleChange,
+  onDone,
+}: {
+  role: Role;
+  onRoleChange: (r: Role) => void;
+  onDone: () => void;
+}) {
+  const [fromFilename, setFromFilename] = useState(true);
   const [rows, setRows] = useState<UploadRow[]>([]);
   const [busy, setBusy] = useState(false);
+  const [dragging, setDragging] = useState(false);
   const input = useRef<HTMLInputElement>(null);
 
   async function run(files: File[]) {
+    files = files.filter((f) => /\.(pdf|docx|txt)$/i.test(f.name));
+    if (!files.length) return;
     setBusy(true);
     setRows(files.map((f) => ({ name: f.name, state: "queued" })));
     for (let i = 0; i < files.length; i++) {
       setRows((r) => r.map((x, j) => (j === i ? { ...x, state: "working" } : x)));
       const fd = new FormData();
       fd.append("file", files[i]);
-      fd.append("role", role);
+      fd.append("role", fromFilename ? "AUTO_" + role : role);
       try {
         const res = await post("/api/upload", fd);
         setRows((r) =>
@@ -186,40 +202,63 @@ function UploadPanel({ onDone }: { onDone: () => void }) {
 
   return (
     <section className="rounded-lg border border-slate-200 bg-white p-4">
-      <div className="flex flex-wrap items-end gap-3">
-        <label className="text-sm">
-          <span className="block text-slate-600">Applied role</span>
-          <select
-            value={role}
-            onChange={(e) => setRole(e.target.value as "AUTO" | Role)}
-            className="mt-1 rounded-md border border-slate-300 bg-white px-2 py-1.5"
-            disabled={busy}
-          >
-            <option value="AUTO">From filename (pm_ / spm_), else PM</option>
-            <option value="PM">Product Manager</option>
-            <option value="SPM">Senior Product Manager</option>
-          </select>
-        </label>
-        <label className="text-sm">
-          <span className="block text-slate-600">CVs (PDF, DOCX, TXT — multiple allowed)</span>
+      <div className="grid gap-4 md:grid-cols-[16rem_minmax(0,1fr)]">
+        <div className="space-y-2 text-sm">
+          <label className="block">
+            <span className="block text-slate-600">Applied role</span>
+            <select
+              value={role}
+              onChange={(e) => onRoleChange(e.target.value as Role)}
+              className="mt-1 w-full rounded-md border border-slate-300 bg-white px-2 py-2"
+              disabled={busy}
+            >
+              <option value="PM">Product Manager</option>
+              <option value="SPM">Senior Product Manager</option>
+            </select>
+          </label>
+          <label className="flex items-start gap-2 text-xs text-slate-500">
+            <input
+              type="checkbox"
+              className="mt-0.5"
+              checked={fromFilename}
+              disabled={busy}
+              onChange={(e) => setFromFilename(e.target.checked)}
+            />
+            <span>Use pm_ / spm_ in the filename when present</span>
+          </label>
+        </div>
+
+        <div
+          onDragOver={(e) => {
+            e.preventDefault();
+            if (!busy) setDragging(true);
+          }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragging(false);
+            if (!busy) run(Array.from(e.dataTransfer.files));
+          }}
+          onClick={() => !busy && input.current?.click()}
+          className={`flex min-h-24 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed px-4 py-5 text-center text-sm transition ${
+            dragging ? "border-slate-900 bg-slate-50" : "border-slate-300 hover:border-slate-400 hover:bg-slate-50"
+          } ${busy ? "cursor-wait opacity-70" : ""}`}
+        >
+          <span className="font-medium text-slate-800">
+            {busy
+              ? `Processing ${done}/${rows.length}…`
+              : `Drop CVs here, or click to choose — they'll be added as ${ROLE_TITLE[role]}`}
+          </span>
+          <span className="mt-1 text-xs text-slate-500">PDF, DOCX or TXT · several at once · up to 4 MB each</span>
           <input
             ref={input}
             type="file"
             multiple
             accept=".pdf,.docx,.txt"
-            disabled={busy}
-            className="mt-1 block text-sm file:mr-3 file:rounded-md file:border-0 file:bg-slate-900 file:px-3 file:py-1.5 file:text-white"
-            onChange={(e) => {
-              const files = Array.from(e.target.files ?? []);
-              if (files.length) run(files);
-            }}
+            className="hidden"
+            onChange={(e) => run(Array.from(e.target.files ?? []))}
           />
-        </label>
-        {rows.length > 0 && (
-          <span className="text-sm text-slate-500">
-            {busy ? "Processing" : "Processed"} {done}/{rows.length}
-          </span>
-        )}
+        </div>
       </div>
       {rows.length > 0 && (
         <ul className="mt-3 max-h-40 space-y-0.5 overflow-y-auto font-mono text-xs">
