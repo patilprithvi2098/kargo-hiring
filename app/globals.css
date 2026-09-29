@@ -3,9 +3,26 @@
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --color-brand: #1e3a5f;
+  --color-brand-light: #2a5a8f;
+  --color-brand-accent: #3b82f6;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f8fafc;
+  --color-muted: #64748b;
 }
 
 body {
-  background: #f6f7f9;
+  background: linear-gradient(135deg, #f0f4f8 0%, #e8eef5 50%, #f0f4f8 100%);
   color: #0f172a;
+  min-height: 100vh;
+}
+
+/* Score bar fills */
+.score-bar-high { background: linear-gradient(90deg, #10b981, #059669); }
+.score-bar-mid  { background: linear-gradient(90deg, #f59e0b, #d97706); }
+.score-bar-low  { background: linear-gradient(90deg, #94a3b8, #64748b); }
+
+/* Smooth transitions on interactive elements */
+button, a, tr, .chip-hover {
+  transition: all 0.15s ease;
 }

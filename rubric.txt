@@ -55,7 +55,9 @@ SCORING
   detected by a fingerprint of their redacted text and share one set of scores.
 - Code-enforced rules (not left to the model):
     * SPM integration depth is capped at 3 unless ops-native >= 3 (the Preetham lesson).
-    * A feature kill counts under "Ships and kills" only, never under "Owns a loss".
+    * PM: a feature kill counts under "Ships and kills", not "Owns a loss" (no double counting).
+      SPM: there is no "Ships and kills" criterion, so killing your own failed bet with a stated
+      lesson counts under "Owns a loss". (v1 of this rule gave SPM kills zero credit — found in audit.)
 
 ====================================================================
 EVIDENCE RULES (from the evidence-first hiring philosophy)
@@ -122,12 +124,17 @@ SENIOR PRODUCT MANAGER (SPM) — weights sum to 100
 ====================================================================
 SPM1. Operations-native — 35%                            SOURCE: Hires (same as PM1)
 SPM2. Integration / data-layer depth — 25%               SOURCE: SPM JD, conditioned by hires
-  Led integrations/migrations/data-quality work touching carriers, ports, ERPs, TMS/FMS, vendors.
+  Owned the systems that connect a logistics business to the outside world: external integrations
+  (carriers, ports, ERPs, vendor APIs), migrations, data quality — OR owned a logistics platform
+  (TMS/WMS/FMS/visibility) end-to-end. (Audit fix: a candidate who built a TMS for 30 clients scored 1
+  because the old anchor only counted integrations named explicitly.)
   Capped at 3 in code unless SPM1 >= 3 — Preetham had this skill without ops grounding and rated Below.
   Evidence: Rohan (vendor migration, 60% lag cut), Sunita (paper -> cloud FMS), Lavanya (carrier
   integration, first API docs).
-  5 = led multiple external integrations with reliability outcomes   4 = led one significant one
-  3 = contributed, or internal platform work   2 = alongside, not owning   1 = none
+  5 = led multiple external integrations with reliability outcomes
+  4 = led one significant one, OR owned a TMS/WMS/FMS/visibility platform end-to-end
+  3 = owned internal platform modules/APIs/pipelines, or contributed to integrations
+  2 = alongside, not owning   1 = none
 SPM3. Works inside the operator's workflow — 20%         SOURCE: Hires (same as PM2)
 SPM4. Owns a loss or failure out loud — 20%              SOURCE: Hires (same as PM4)
 

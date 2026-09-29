@@ -85,6 +85,15 @@ const ownsLoss = {
   },
 };
 
+/** SPM has no "Ships and kills" criterion, so an owned failed bet (incl. a kill with a lesson) counts here. */
+const ownsLossSpm = {
+  ...ownsLoss,
+  definition:
+    "The CV names a loss, outage, failed bet or mistake the candidate owned, and what changed afterwards. " +
+    "For SPM this INCLUDES killing their own product bet when the CV states why it failed and what they learned " +
+    "(the SPM rubric has no separate ships-and-kills criterion). Fixing someone else's crisis is not owning a failure.",
+};
+
 export const RUBRICS: Record<Role, Rubric> = {
   PM: {
     role: "PM",
@@ -122,19 +131,21 @@ export const RUBRICS: Record<Role, Rubric> = {
         source:
           "SPM JD (owns carrier/port/ERP integrations). Hires add the condition: Preetham had strong integration skills without ops grounding and rated Below — so this is capped at 3 in code unless ops-native is 3+.",
         definition:
-          "Led integrations, migrations, data-quality or reliability work that touches external systems (carriers, ports, ERPs, TMS/FMS, vendors).",
+          "Owned the systems that connect a logistics business to the outside world: external integrations (carriers, ports, ERPs, vendor APIs), " +
+          "migrations, data-quality or reliability work — OR owned end-to-end a logistics/supply-chain platform (TMS, WMS, FMS, visibility) " +
+          "that carriers, shippers or other systems depend on. Integrations need not be named explicitly if the owned platform clearly implies them.",
         hireEvidence:
           "Rohan (legacy data-vendor migration, 60% lag cut), Sunita (paper -> cloud FMS migration), Lavanya (carrier integration, first API docs). Preetham: 3PL API integrations but Below.",
         anchors: {
           5: "Led multiple external integrations/migrations with reliability or data-quality outcomes",
-          4: "Led one significant external integration/migration",
-          3: "Contributed to integrations or owned internal platform work",
-          2: "Worked alongside integration work without owning it",
-          1: "No integration/platform exposure",
+          4: "Led one significant external integration/migration, OR owned a logistics platform (TMS/WMS/FMS/visibility) end-to-end",
+          3: "Owned internal platform modules, APIs or data pipelines, or contributed to external integrations",
+          2: "Worked alongside platform/integration work without owning it",
+          1: "No platform or integration exposure",
         },
       },
       { ...embedded, weight: 20 },
-      { ...ownsLoss, weight: 20 },
+      { ...ownsLossSpm, weight: 20 },
     ],
   },
 };

@@ -1,27 +1,37 @@
-Rubric v2 validation on the 8 past hires — 2026-09-28T08:44:53.029Z
+Rubric v2.1 validation on the 8 past hires (median of 3 runs per criterion) — 2026-09-29T05:05:26.787Z
 
 Ranked by PM score. Criteria order PM [ops embedded ships_kills owns_loss], SPM [ops integration embedded owns_loss]
-Rohan Desai            Exceeds  PM    80 floor✗  [5 5 3 3]   SPM  83.8 [5 4 5 3]
-Lavanya Iyer           Exceeds  PM    80        [5 3 5 3]   SPM  67.5 [5 3 3 3]
-Sunita Krishnamurthy   Exceeds  PM    70 floor✗  [5 5 1 3]   SPM  83.8 [5 4 5 3]
+Lavanya Iyer           Exceeds  PM    80        [5 3 5 3]   SPM  78.8 [5 4 3 4]
+Rohan Desai            Exceeds  PM    75 floor✗  [5 4 3 3]   SPM  78.8 [5 4 4 3]
+Sunita Krishnamurthy   Exceeds  PM    65 floor✗  [5 5 1 2]   SPM  78.8 [5 4 5 2]
 Meghna Tiwari          Exceeds  PM    60 floor✗  [5 3 1 3]   SPM    55 [5 1 3 3]
-Aditya Shetty          Exceeds  PM    40 floor✗  [2 3 1 5]   SPM  38.8 [2 1 3 5]
-Vikram Nair            Meets    PM    25        [1 3 3 2]   SPM    15 [1 1 3 2]
+Aditya Shetty          Exceeds  PM    45 floor✗  [2 4 1 5]   SPM    50 [2 2 4 5]
+Vikram Nair            Meets    PM    25        [1 3 3 2]   SPM  21.3 [1 2 3 2]
 Preetham Rao           Below    PM    25 floor✗  [2 1 2 3]   SPM  31.3 [2 3 1 3]
-Rahul Bose             Meets    PM     5 floor✗  [1 1 1 2]   SPM     5 [1 1 1 2]
+Rahul Bose             Meets    PM    10 floor✗  [1 2 1 2]   SPM    10 [1 1 2 2]
 
-Lowest Exceeds PM score 40 vs highest Meets/Below 25 -> PASS: rubric separates all 8
+Lowest Exceeds PM score 45 vs highest Meets/Below 25 -> PASS: rubric separates all 8
 Among actual PM hires: Lavanya Iyer 80 vs Vikram Nair 25 -> PASS
-Mean PM score: Exceeds 66.0, Meets/Below 18.3
+Mean PM score: Exceeds 65.0, Meets/Below 20.0
+
+Run-to-run spread (PM criteria, 3 runs each):
+  Lavanya Iyer           ops_native 5/5/5  embedded_with_operators 3/3/3  ships_and_kills 5/5/5  owns_loss 3/3/3
+  Rohan Desai            ops_native 5/5/5  embedded_with_operators 4/4/4  ships_and_kills 3/3/3  owns_loss 3/3/3
+  Sunita Krishnamurthy   ops_native 5/5/5  embedded_with_operators 5/5/5  ships_and_kills 1/1/1  owns_loss 2/2/2
+  Meghna Tiwari          ops_native 5/5/5  embedded_with_operators 3/3/3  ships_and_kills 1/1/1  owns_loss 3/3/3
+  Aditya Shetty          ops_native 2/2/2  embedded_with_operators 4/4/3  ships_and_kills 1/1/1  owns_loss 5/5/5
+  Vikram Nair            ops_native 1/1/1  embedded_with_operators 3/3/3  ships_and_kills 3/3/3  owns_loss 2/2/2
+  Preetham Rao           ops_native 2/2/2  embedded_with_operators 1/1/1  ships_and_kills 3/2/2  owns_loss 3/3/3
+  Rahul Bose             ops_native 1/1/1  embedded_with_operators 2/1/2  ships_and_kills 1/1/1  owns_loss 2/2/2
 
 Evidence for the two PM hires:
 -- Lavanya Iyer
-   ops_native 5: “Managed carrier allocation, capacity planning, and exception management for 3 FMCG client accounts across South India — combined throughput of 800+ shipments monthly” — Candidate spent over
-   embedded_with_operators 3: “Running 3 ongoing discovery tracks in parallel with freight forwarder clients — led one session that uncovered a workflow mismatch in how carriers confirmed slot bookings” — Maintained regu
-   ships_and_kills 5: “Shipped 6 features across 12 months; killed 2 after early usage data showed low adoption despite strong qualitative demand in discovery” — Shipped 6 features and killed 2 based on usage dat
-   owns_loss 3: “Drafted and sent the post-mortem after a 4-hour platform outage — wrote the internal and customer-facing versions, ran the retrospective, and owned the follow-up action items to closure” — 
+   ops_native 5 (runs 5/5/5): “Managed carrier allocation, capacity planning, and exception management for 3 FMCG client accounts across South India — combined throughput of 800+ shipments monthly” — 
+   embedded_with_operators 3 (runs 3/3/3): “Running 3 ongoing discovery tracks in parallel with freight forwarder clients — led one session that uncovered a workflow mismatch in how carriers confirmed slot booking
+   ships_and_kills 5 (runs 5/5/5): “killed 2 after early usage data showed low adoption despite strong qualitative demand in discovery — redirected the sprint capacity to a workflow that showed 3x higher w
+   owns_loss 3 (runs 3/3/3): “Drafted and sent the post-mortem after a 4-hour platform outage — wrote the internal and customer-facing versions, ran the retrospective, and owned the follow-up action 
 -- Vikram Nair
-   ops_native 1: Not demonstrated on the CV. Not demonstrated on the CV. Candidate has worked exclusively in HR software with no operational logistics or supply chain exposure.
-   embedded_with_operators 3: “informed by 40+ user interviews across 6 enterprise accounts over 10 weeks” — Candidate conducted extensive discovery interviews and customer calls, but did not embed alongside operators in
-   ships_and_kills 3: “Shipped 12 features over 18 months across ATS, structured assessment, and offer management; 3 features moved to premium tier, contributing $180K in incremental ARR” — Candidate repeatedly s
-   owns_loss 2: Not demonstrated on the CV. Not demonstrated on the CV. The CV highlights successful outcomes without mentioning any outages, failed bets, or candidate-owned mistakes.
+   ops_native 1 (runs 1/1/1): Not demonstrated on the CV; the candidate's work history is in enterprise HR technology SaaS with no operational logistics exposure.
+   embedded_with_operators 3 (runs 3/3/3): “informed by 40+ user interviews across 6 enterprise accounts over 10 weeks” — User interaction was conducted via interviews and discovery calls rather than being embedde
+   ships_and_kills 3 (runs 3/3/3): “Shipped 12 features over 18 months across ATS, structured assessment, and offer management; 3 features moved to premium tier, contributing $180K in incremental ARR” — Sh
+   owns_loss 2 (runs 2/2/2): Not demonstrated on the CV; no failures, outages, or mistakes are mentioned.

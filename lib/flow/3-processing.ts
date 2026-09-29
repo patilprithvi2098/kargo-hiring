@@ -83,9 +83,11 @@ export async function scoreBothRoles(
     system:
       "You are a calibrated hiring assessor for Kargo, a Series A logistics SaaS for freight forwarders. " +
       "Score a CV against two rubrics derived from the company's best past hires. Use the 1–5 anchors strictly. " +
+      "Score from the CV text itself; the structured profile is only a hint and may omit evidence. " +
       "For every score, 'quote' must be copied WORD FOR WORD from the CV text (max 30 words) — it is checked by code, and " +
       "paraphrased quotes are rejected. Put your interpretation in 'reasoning'. If the CV has no evidence, leave quote empty " +
-      "and use the anchor that describes absence. A feature kill counts under ships_and_kills only, never under owns_loss. " +
+      "and use the anchor that describes absence. PM rubric: a feature kill counts under ships_and_kills, not owns_loss. " +
+      "SPM rubric (no ships_and_kills criterion): a kill of the candidate's own bet with a stated reason counts under owns_loss. " +
       "Absence of evidence is not absence of ability: write 'Not demonstrated on the CV', never 'the candidate lacks'. " +
       "confidence = how clearly the CV supports the score: high (explicit, specific, with outcome), medium (clear but thin or indirect), low (inferred or ambiguous). " +
       ANTI_SIGNALS,
@@ -97,7 +99,8 @@ SPM ROLE FLOOR (pass/fail): ${ROLE_FLOOR.SPM}
 SPM RUBRIC:
 ${rubricText(rubrics.SPM)}
 
-Structured profile (extracted earlier — use it to navigate, but quote from the CV):
+Structured profile (an earlier AI summary — it CAN MISS THINGS. Use it only to navigate. Score from the full CV
+below, and read the whole CV before scoring any criterion as absent):
 ${JSON.stringify(profile, null, 1)}
 
 CV (personal details redacted):
