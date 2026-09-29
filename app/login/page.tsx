@@ -1,39 +1,43 @@
 "use client";
 import { useActionState } from "react";
 import { login } from "./actions";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default function LoginPage() {
   const [error, action, pending] = useActionState(login, null);
   return (
     <main className="flex flex-1 items-center justify-center p-4">
-      <form action={action} className="w-full max-w-sm space-y-5 rounded-2xl border border-slate-200 bg-white p-7 shadow-lg">
+      <div className="absolute right-4 top-4">
+        <ThemeToggle />
+      </div>
+      <form action={action} className="w-full max-w-sm space-y-5 rounded-2xl border border-[var(--border-card)] bg-[var(--bg-card)] p-7 shadow-[var(--shadow-lg)]">
         <div className="text-center">
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[var(--color-brand)] to-[var(--color-brand-light)] text-lg font-bold text-white shadow-md">
             K
           </div>
-          <h1 className="text-xl font-semibold text-slate-900">Kargo Hiring</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <h1 className="text-xl font-semibold text-[var(--text-primary)]">Kargo Hiring</h1>
+          <p className="mt-1 text-sm text-[var(--text-muted)]">
             Sign in to review candidates for the PM and SPM roles.
           </p>
         </div>
         <label className="block text-sm">
-          <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Your name</span>
+          <span className="text-xs font-medium uppercase tracking-wide text-[var(--text-muted)]">Your name</span>
           <input
             name="name"
             required
             defaultValue="Arjun Mehta"
             placeholder="Arjun Mehta"
-            className="mt-1.5 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 focus:border-[var(--color-brand-accent)] focus:ring-1 focus:ring-[var(--color-brand-accent)] focus:outline-none"
+            className="mt-1.5 w-full rounded-lg border border-[var(--border-input)] bg-[var(--bg-input)] px-3 py-2.5 text-[var(--text-primary)] focus:border-[var(--color-brand-accent)] focus:ring-1 focus:ring-[var(--color-brand-accent)] focus:outline-none"
           />
-          <span className="mt-1 block text-xs text-slate-400">Recorded against every decision and email you send.</span>
+          <span className="mt-1 block text-xs text-[var(--text-tertiary)]">Recorded against every decision and email you send.</span>
         </label>
         <label className="block text-sm">
-          <span className="text-xs font-medium uppercase tracking-wide text-slate-500">Password</span>
+          <span className="text-xs font-medium uppercase tracking-wide text-[var(--text-muted)]">Password</span>
           <input
             name="password"
             type="password"
             required
-            className="mt-1.5 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 focus:border-[var(--color-brand-accent)] focus:ring-1 focus:ring-[var(--color-brand-accent)] focus:outline-none"
+            className="mt-1.5 w-full rounded-lg border border-[var(--border-input)] bg-[var(--bg-input)] px-3 py-2.5 text-[var(--text-primary)] focus:border-[var(--color-brand-accent)] focus:ring-1 focus:ring-[var(--color-brand-accent)] focus:outline-none"
           />
         </label>
         {error && (
