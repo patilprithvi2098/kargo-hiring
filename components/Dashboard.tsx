@@ -563,11 +563,15 @@ function CandidateDetail({
   const [confirming, setConfirming] = useState(false);
   const [openedGmail, setOpenedGmail] = useState(false);
 
+  useEffect(() => {
+    setSubject(c.email_subject ?? "");
+    setBody(c.email_body ?? "");
+  }, [c.email_subject, c.email_body]);
+
   const role = c.role_applied;
   const other: Role = role === "PM" ? "SPM" : "PM";
   const sent = c.email_status === "sent";
   const dirty = subject !== (c.email_subject ?? "") || body !== (c.email_body ?? "");
-  const effective = c.decision ?? c.recommendation;
   const to = testRecipient || c.email;
   const p = (c.profile ?? {}) as Record<string, unknown>;
 
@@ -745,128 +749,138 @@ function CandidateDetail({
         </div>
       )}
 
-      {/* Decision */}
-      <div className="rounded-2xl border border-[var(--border-card)] bg-[var(--bg-card)] p-5 shadow-[var(--shadow-card)]">
-        <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">Your decision</h3>
-        <p className="mb-3 text-sm">
-          System recommends{" "}
-          <Chip tone={c.recommendation === "invite" ? "green" : "slate"}>{c.recommendation}</Chip>
-          {c.decision && (
-            <span className="text-[var(--text-muted)]">
-              {" "}
-              · decided <b>{c.decision}</b> by {c.decided_by}
-            </span>
-          )}
-        </p>
-        <div className="flex gap-2">
-          {(["invite", "decline"] as const).map((d) => (
-            <button
-              key={d}
-              disabled={sent || !!busy}
-              onClick={() => act("decision", () => post(`/api/candidates/${c.id}/decision`, { decision: d }))}
-              className={`rounded-lg border px-4 py-2 text-sm font-medium capitalize transition-all disabled:opacity-40 ${
-                effective === d
-                  ? d === "invite"
-                    ? "border-emerald-600 bg-emerald-600 text-white shadow-sm"
-                    : "border-slate-800 bg-slate-800 text-white shadow-sm"
-                  : "border-[var(--border-card)] bg-[var(--bg-card)] text-[var(--text-secondary)] hover:border-[var(--border-card)] hover:shadow-sm"
-              }`}
-            >
-              {busy === "decision" ? "…" : d}
-            </button>
-          ))}
+      {/* Action — the email you send IS the decision */}
+      <div className="rounded-2xl border border-[var(--border-card)] bg-[var(--bg-card)] shadow-[var(--shadow-card)]">
+        <div className="flex items-center justify-between border-b border-[var(--border-card)] px-5 py-3">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">Your action</h3>
+          <p className="text-xs text-[var(--text-secondary)]">
+            System recommends{" "}
+            <Chip tone={c.recommendation === "invite" ? "green" : "slate"}>{c.recommendation}</Chip>
+          </p>
         </div>
-      </div>
 
-      {/* Email draft */}
-      <div className="rounded-2xl border border-[var(--border-card)] bg-[var(--bg-card)] p-5 shadow-[var(--shadow-card)]">
-        <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">
-            Draft {c.email_type} email {c.email_edited && <span className="normal-case text-[var(--text-tertiary)]">(edited by you)</span>}
-          </h3>
-          {sent && (
-            <span className="text-xs text-blue-700">
-              Sent {c.send_channel === "gmail" ? "from Gmail" : "via Resend"} to {c.email_to} by {c.sent_by} ·{" "}
+        {sent ? (
+          <div className="p-5">
+            <p className="mb-3 text-sm text-[var(--text-secondary)]">
+              <Chip tone={c.email_type === "invite" ? "green" : "slate"}>{c.email_type}</Chip>{" "}
+              sent {c.send_channel === "gmail" ? "from Gmail" : "via Resend"} to {c.email_to} by {c.sent_by} ·{" "}
               {new Date(c.sent_at!).toLocaleString()}
-            </span>
-          )}
-        </div>
-        <input
-          value={subject}
-          disabled={sent}
-          onChange={(e) => setSubject(e.target.value)}
-          className="w-full rounded-lg border border-[var(--border-card)] bg-[var(--bg-card-alt)] px-3 py-2 text-sm focus:border-[var(--color-brand-accent)] focus:ring-1 focus:ring-[var(--color-brand-accent)] focus:outline-none disabled:bg-[var(--bg-input)] disabled:text-[var(--text-muted)]"
-        />
-        <textarea
-          value={body}
-          disabled={sent}
-          onChange={(e) => setBody(e.target.value)}
-          rows={9}
-          className="mt-2 w-full rounded-lg border border-[var(--border-card)] bg-[var(--bg-card-alt)] px-3 py-2 text-sm leading-relaxed focus:border-[var(--color-brand-accent)] focus:ring-1 focus:ring-[var(--color-brand-accent)] focus:outline-none disabled:bg-[var(--bg-input)] disabled:text-[var(--text-muted)]"
-        />
-        <p className="mt-1.5 text-xs text-[var(--text-tertiary)]">
-          [NAME] becomes &ldquo;{firstName(c.name)}&rdquo; when sent. The AI never saw the name.
-        </p>
-        {error && <p className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
-        {!sent && (
-          <div className="mt-3 flex flex-wrap gap-2">
-            <button
-              disabled={!dirty || !!busy}
-              onClick={() => act("save", () => post(`/api/candidates/${c.id}/email`, { subject, body }))}
-              className="rounded-lg border border-[var(--border-card)] bg-[var(--bg-card)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-card-alt)] disabled:opacity-40"
-            >
-              {busy === "save" ? "Saving…" : "Save edits"}
-            </button>
-            <a
-              href={
-                to && !dirty
-                  ? gmailComposeUrl(
-                      to,
-                      subject.replace(/\[NAME\]/g, firstName(c.name)),
-                      body.replace(/\[NAME\]/g, firstName(c.name)),
-                    )
-                  : undefined
-              }
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => {
-                if (dirty || !to) e.preventDefault();
-                else setOpenedGmail(true);
-              }}
-              aria-disabled={dirty || !to}
-              className={`inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 ${
-                dirty || !to ? "pointer-events-none opacity-40" : ""
-              }`}
-              title={dirty ? "Save your edits first" : "Opens a pre-filled draft in your Gmail — you press Send there"}
-            >
-              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M20 18h-2V9.25L12 13 6 9.25V18H4V6h1.2l6.8 4.25L18.8 6H20m0-2H4c-1.11 0-2 .89-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2z"/></svg>
-              Open in Gmail
-            </a>
-            <button
-              disabled={dirty || !!busy || !resendReady || !to}
-              onClick={() => setConfirming(true)}
-              className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 disabled:opacity-40"
-              title={dirty ? "Save your edits first" : !resendReady ? "Resend key not configured" : ""}
-            >
-              Confirm &amp; send via Resend
-            </button>
+            </p>
+            <div className="whitespace-pre-wrap rounded-xl border border-[var(--border-card)] bg-[var(--bg-card-alt)] p-3 text-sm text-[var(--text-primary)]">
+              <b>{subject}</b>{"\n\n"}{body}
+            </div>
           </div>
-        )}
-        {!sent && openedGmail && (
-          <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-[var(--border-card)] bg-[var(--bg-card-alt)] p-3 text-xs text-[var(--text-secondary)]">
-            <span>Sent it from Gmail? Record it so the dashboard shows who sent what.</span>
-            <button
-              disabled={!!busy}
-              onClick={() =>
-                act("marked", () => post(`/api/candidates/${c.id}/mark-sent`, { confirmedType: c.email_type }))
-              }
-              className="rounded-lg border border-[var(--border-card)] bg-[var(--bg-card)] px-3 py-1.5 text-xs font-medium text-[var(--text-primary)] shadow-sm hover:bg-[var(--bg-card-alt)] disabled:opacity-40"
-            >
-              {busy === "marked" ? "Recording…" : "I sent it from Gmail"}
-            </button>
-            <button className="text-xs text-[var(--text-muted)] underline" onClick={() => setOpenedGmail(false)}>
-              Not sent
-            </button>
+        ) : (
+          <div>
+            {/* Invite / Decline tabs */}
+            <div className="flex border-b border-[var(--border-card)]">
+              {(["invite", "decline"] as const).map((tab) => (
+                <button
+                  key={tab}
+                  disabled={!!busy || (dirty && c.email_type !== tab)}
+                  onClick={() => {
+                    if (c.email_type !== tab) {
+                      act("decision", () => post(`/api/candidates/${c.id}/decision`, { decision: tab }));
+                    }
+                  }}
+                  title={dirty && c.email_type !== tab ? "Save or discard your edits first" : undefined}
+                  className={`relative px-5 py-3 text-sm font-medium transition-all disabled:opacity-40 ${
+                    c.email_type === tab
+                      ? tab === "invite"
+                        ? "text-emerald-600"
+                        : "text-[var(--text-primary)]"
+                      : "text-[var(--text-muted)] hover:text-[var(--text-secondary)]"
+                  }`}
+                >
+                  {tab === "invite" ? "Invite to interview" : "Send decline"}
+                  {busy === "decision" && c.email_type !== tab && " …"}
+                  {c.email_type === tab && (
+                    <span className={`absolute bottom-0 left-0 right-0 h-0.5 ${tab === "invite" ? "bg-emerald-600" : "bg-[var(--text-primary)]"}`} />
+                  )}
+                </button>
+              ))}
+            </div>
+
+            {/* Email editor */}
+            <div className="p-5">
+              {c.email_edited && (
+                <p className="mb-2 text-xs text-[var(--text-tertiary)]">Edited by you</p>
+              )}
+              <input
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                className="w-full rounded-lg border border-[var(--border-card)] bg-[var(--bg-card-alt)] px-3 py-2 text-sm text-[var(--text-primary)] focus:border-[var(--color-brand-accent)] focus:ring-1 focus:ring-[var(--color-brand-accent)] focus:outline-none"
+              />
+              <textarea
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                rows={9}
+                className="mt-2 w-full rounded-lg border border-[var(--border-card)] bg-[var(--bg-card-alt)] px-3 py-2 text-sm leading-relaxed text-[var(--text-primary)] focus:border-[var(--color-brand-accent)] focus:ring-1 focus:ring-[var(--color-brand-accent)] focus:outline-none"
+              />
+              <p className="mt-1.5 text-xs text-[var(--text-tertiary)]">
+                [NAME] becomes &ldquo;{firstName(c.name)}&rdquo; when sent. The AI never saw the name.
+              </p>
+              {error && <p className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  disabled={!dirty || !!busy}
+                  onClick={() => act("save", () => post(`/api/candidates/${c.id}/email`, { subject, body }))}
+                  className="rounded-lg border border-[var(--border-card)] bg-[var(--bg-card)] px-4 py-2 text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-card-alt)] disabled:opacity-40"
+                >
+                  {busy === "save" ? "Saving…" : "Save edits"}
+                </button>
+                <a
+                  href={
+                    to && !dirty
+                      ? gmailComposeUrl(
+                          to,
+                          subject.replace(/\[NAME\]/g, firstName(c.name)),
+                          body.replace(/\[NAME\]/g, firstName(c.name)),
+                        )
+                      : undefined
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => {
+                    if (dirty || !to) e.preventDefault();
+                    else setOpenedGmail(true);
+                  }}
+                  aria-disabled={dirty || !to}
+                  className={`inline-flex items-center gap-1.5 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 ${
+                    dirty || !to ? "pointer-events-none opacity-40" : ""
+                  }`}
+                  title={dirty ? "Save your edits first" : "Opens a pre-filled draft in your Gmail — you press Send there"}
+                >
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><path d="M20 18h-2V9.25L12 13 6 9.25V18H4V6h1.2l6.8 4.25L18.8 6H20m0-2H4c-1.11 0-2 .89-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2z"/></svg>
+                  Open in Gmail
+                </a>
+                <button
+                  disabled={dirty || !!busy || !resendReady || !to}
+                  onClick={() => setConfirming(true)}
+                  className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-emerald-700 disabled:opacity-40"
+                  title={dirty ? "Save your edits first" : !resendReady ? "Resend key not configured" : ""}
+                >
+                  Confirm &amp; send via Resend
+                </button>
+              </div>
+              {openedGmail && (
+                <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-[var(--border-card)] bg-[var(--bg-card-alt)] p-3 text-xs text-[var(--text-secondary)]">
+                  <span>Sent it from Gmail? Record it so the dashboard shows who sent what.</span>
+                  <button
+                    disabled={!!busy}
+                    onClick={() =>
+                      act("marked", () => post(`/api/candidates/${c.id}/mark-sent`, { confirmedType: c.email_type }))
+                    }
+                    className="rounded-lg border border-[var(--border-card)] bg-[var(--bg-card)] px-3 py-1.5 text-xs font-medium text-[var(--text-primary)] shadow-sm hover:bg-[var(--bg-card-alt)] disabled:opacity-40"
+                  >
+                    {busy === "marked" ? "Recording…" : "I sent it from Gmail"}
+                  </button>
+                  <button className="text-xs text-[var(--text-muted)] underline" onClick={() => setOpenedGmail(false)}>
+                    Not sent
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>

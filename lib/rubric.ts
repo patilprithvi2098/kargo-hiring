@@ -85,6 +85,51 @@ const ownsLoss = {
   },
 };
 
+const operatesWithoutPlaybook = {
+  key: "operates_without_playbook",
+  name: "Operates without a playbook",
+  source:
+    "PM JD ('no PM handbook, no design system, no sprint template — you'll build those'), SPM JD ('no committee that approves product decisions'). " +
+    "Kargo is Series A, 40 people, no PM function yet — both roles are building from scratch.",
+  definition:
+    "Evidence the candidate has worked in environments with little or no existing product process AND built the structure themselves " +
+    "(prioritisation frameworks, sprint cadence, decision rituals, documentation practices). Working at a startup alone is not enough — " +
+    "the CV must show they created order, not just survived chaos.",
+  hireEvidence:
+    "Lavanya (first PM at a 20-person logistics startup, set up sprint cadence and release process), Rohan (sole PM at early-stage, " +
+    "built customer feedback loop from zero), Sunita (led process redesign during platform migration). Vikram worked at a 500-person company with an established PM org.",
+  anchors: {
+    5: "First/sole PM at a company AND built specific PM processes (named: sprint cadence, prioritisation framework, decision log, etc.) with evidence they stuck",
+    4: "First/sole PM or very early team, created some processes but specifics are vague",
+    3: "Worked at an early-stage company (<50 people) in a product role, adapted to ambiguity but didn't explicitly build process",
+    2: "Product role at an established company (50+ people) with existing PM processes, or agency/consulting with defined workflows",
+    1: "Only worked in companies with mature PM orgs, or no evidence of operating without structure",
+  },
+};
+
+const crossFunctionalInfluence = {
+  key: "cross_functional_influence",
+  name: "Cross-functional influence",
+  source:
+    "PM JD ('working directly with engineering… how decisions are communicated across the team'), " +
+    "SPM JD ('working across sales, engineering, and customer operations'). At 40 people there is no layer between PM and the teams — " +
+    "both roles must drive alignment without authority.",
+  definition:
+    "Evidence the candidate drove decisions or alignment across two or more functions (engineering, sales, ops, support, leadership) " +
+    "without positional authority. Must show a specific outcome from that alignment, not just 'collaborated with' or 'worked closely with'.",
+  hireEvidence:
+    "Rohan (aligned eng + ops on freight rollout prioritisation, cut onboarding time 40%), Lavanya (drove eng + sales alignment on " +
+    "carrier integration roadmap, unblocked 3 stalled deals), Aditya (bridged terminal ops + product on peak-season capacity tool). " +
+    "Rahul's cross-team mentions are marketing-only.",
+  anchors: {
+    5: "Named examples of aligning 3+ functions on a decision, with a measurable outcome from that alignment",
+    4: "Aligned 2+ functions with a clear outcome, or 3+ functions without a stated outcome",
+    3: "Mentions cross-functional work with some specificity but no alignment outcome (e.g. 'presented roadmap to sales')",
+    2: "Generic 'collaborated with engineering' or 'worked with stakeholders' language with no specifics",
+    1: "No evidence of cross-functional work, or worked entirely within one function",
+  },
+};
+
 /** SPM has no "Ships and kills" criterion, so an owned failed bet (incl. a kill with a lesson) counts here. */
 const ownsLossSpm = {
   ...ownsLoss,
@@ -98,12 +143,12 @@ export const RUBRICS: Record<Role, Rubric> = {
   PM: {
     role: "PM",
     criteria: [
-      { ...opsNative, weight: 40 },
-      { ...embedded, weight: 20 },
+      { ...opsNative, weight: 30 },
+      { ...embedded, weight: 15 },
       {
         key: "ships_and_kills",
         name: "Ships and kills in short cycles",
-        weight: 20,
+        weight: 15,
         source:
           "PM JD ('shipped things, killed things… short cycles'), confirmed by hires: Lavanya (Exceeds) shipped 6 and killed 2; Vikram (Meets) shipped 12, killed none. n=2.",
         definition:
@@ -117,17 +162,19 @@ export const RUBRICS: Record<Role, Rubric> = {
           1: "Roadmap/process language only, nothing concrete shipped",
         },
       },
-      { ...ownsLoss, weight: 20 },
+      { ...ownsLoss, weight: 15 },
+      { ...operatesWithoutPlaybook, weight: 15 },
+      { ...crossFunctionalInfluence, weight: 10 },
     ],
   },
   SPM: {
     role: "SPM",
     criteria: [
-      { ...opsNative, weight: 35 },
+      { ...opsNative, weight: 25 },
       {
         key: "integration_depth",
         name: "Integration / data-layer depth",
-        weight: 25,
+        weight: 20,
         source:
           "SPM JD (owns carrier/port/ERP integrations). Hires add the condition: Preetham had strong integration skills without ops grounding and rated Below — so this is capped at 3 in code unless ops-native is 3+.",
         definition:
@@ -144,8 +191,10 @@ export const RUBRICS: Record<Role, Rubric> = {
           1: "No platform or integration exposure",
         },
       },
-      { ...embedded, weight: 20 },
-      { ...ownsLossSpm, weight: 20 },
+      { ...embedded, weight: 15 },
+      { ...ownsLossSpm, weight: 15 },
+      { ...operatesWithoutPlaybook, weight: 15 },
+      { ...crossFunctionalInfluence, weight: 10 },
     ],
   },
 };
